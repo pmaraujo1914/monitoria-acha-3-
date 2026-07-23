@@ -1,7 +1,7 @@
 const temporaryStore={};
 const repository={
   get(key){try{const saved=localStorage.getItem(`acha-${key}`),data=saved?JSON.parse(saved):(temporaryStore[key]||[]);return Array.isArray(data)?data:[];}catch{return Array.isArray(temporaryStore[key])?temporaryStore[key]:[];}},
-  save(key,data){temporaryStore[key]=data;try{localStorage.setItem(`acha-${key}`,JSON.stringify(data));}catch{console.warn('Os dados ficarão disponíveis somente enquanto esta página estiver aberta.');}}
+  save(key,data){temporaryStore[key]=data;try{localStorage.setItem(`acha-${key}`,JSON.stringify(data));}catch{console.warn('Os dados ficarão disponíveis somente enquanto esta página estiver aberta.');}if(typeof window.monitoriaCloudSync==='function')window.monitoriaCloudSync(key,data);}
 };
 const categories=['Processo parado','Risco de prazo','Pendência documental','Cartório','Prefeitura','Caixa','Condomínio','Cliente','Erro Operacional','Falha de Comunicação','Melhoria Identificada','Pessoal','Outro'];
 const operators={
@@ -113,3 +113,7 @@ function initialize(){
   const savedSession=findUser(loadSession());if(savedSession&&savedSession.password)startSession(savedSession);else showLogin();
 }
 document.addEventListener('DOMContentLoaded',initialize);
+window.monitoriaData={
+  setCollections(collections={}){occurrences=Array.isArray(collections['operational-occurrences'])?collections['operational-occurrences']:[];pendings=Array.isArray(collections['operational-pendings'])?collections['operational-pendings']:[];tickets=Array.isArray(collections['operational-tickets'])?collections['operational-tickets']:[];renderAll();},
+  renderAccesses
+};
