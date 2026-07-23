@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitoramento Operacional – Registro de Ocorrências Operacionais</title>
+  <meta name="description" content="Sistema estático para registrar, acompanhar e tratar ocorrências operacionais.">
+  <meta name="theme-color" content="#0739c7">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-panel{display:none}.page-panel.active{display:block}.dashboard-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.report-card{padding:20px}.dashboard-full{grid-column:1/-1}.report-list,.pending-mini-list{display:grid;gap:9px}.report-row,.mini-pending{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:9px;background:#f8faff}.report-row strong{color:#0739c7;font-size:17px}.summary-text{line-height:1.55;color:#667085}.summary-text strong{display:block;color:#202635;font-size:18px}.summary-text p{margin-bottom:0}.muted-copy{margin:0;color:#667085;font-size:13px}.priority-baixa{background:#e8f8f0;color:#168a5a}.priority-média{background:#fff5d9;color:#a86a00}.priority-alta{background:#ffe8e8;color:#c93636}.not-applicable{background:#f4f6fa;color:#667085}@media(max-width:780px){.dashboard-grid{grid-template-columns:1fr}.dashboard-full{grid-column:auto}}
+    .user-card{gap:11px;background:linear-gradient(135deg,#fff,#f7f9ff)}.user-card strong{line-height:1.25}.avatar{width:36px;height:36px;flex:0 0 36px;border-radius:11px;background:linear-gradient(135deg,#0739c7,#335eea);box-shadow:0 5px 12px rgba(7,57,199,.22);font-size:12px}.pending-card small{color:#667085;font-size:12px}.not-applicable{grid-column:1/-1;margin:0;padding:11px 12px;border-radius:9px;font-size:12px;line-height:1.45}.not-applicable i{margin-right:5px}.table-wrap table{min-width:1080px}.auth-gate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#edf3ff,#f7f9fc)}.auth-card{width:min(440px,100%);padding:30px;background:#fff;border:1px solid #dce3ef;border-radius:18px;box-shadow:0 20px 50px rgba(28,38,69,.14)}.auth-brand{display:flex;align-items:center;gap:12px;padding-bottom:20px;margin-bottom:22px;border-bottom:1px solid #dce3ef}.auth-brand strong,.auth-brand small{display:block}.auth-brand strong{color:#0739c7;font-size:17px}.auth-brand small{margin-top:3px;color:#667085;font-size:12px}.auth-card h1{margin:0;font-size:24px}.auth-card>div>p:not(.eyebrow){margin:8px 0 20px;color:#667085}.auth-form{display:grid;gap:14px}.auth-form .btn{margin-top:4px}.auth-feedback{margin:0!important;padding:10px 12px;border-radius:8px;background:#fff0f0!important;color:#b42318!important;font-size:12px;font-weight:700}.access-card,.access-list-card{padding:22px}.access-list-card{margin-top:16px}.access-form{display:flex;align-items:end;gap:12px}.access-form label{flex:1}.generated-password{margin-top:16px;padding:14px;border:1px solid #cbd8f4;border-radius:10px;background:#eef4ff;color:#0739c7}.generated-password strong{display:block;margin-top:4px;font:700 18px ui-monospace,Consolas,monospace;letter-spacing:.04em}@media(max-width:780px){.access-form{display:grid;grid-template-columns:1fr}.access-form .btn{width:max-content}}
+  </style>
+</head>
+<body>
+  <div class="app-shell" id="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard" aria-label="ACHA Imóveis — início">
+        <img src="assets/logo-acha.jpeg" alt="Logo ACHA Imóveis">
+        <span><strong>ACHA Imóveis</strong><small>CRM documental interno</small></span>
+      </a>
+      <div class="user-card"><span class="avatar" aria-hidden="true">MO</span><strong id="logged-user">Monitor de Operações</strong></div>
+      <nav class="nav" aria-label="Menu principal">
+        <a class="active" href="#dashboard" data-page="dashboard"><i class="fa-solid fa-table-columns"></i>Dashboard</a>
+        <a href="#pendencias" data-page="pendencias"><i class="fa-solid fa-list-check"></i>Pendências</a>
+        <a href="#ocorrencias" data-page="ocorrencias"><i class="fa-solid fa-triangle-exclamation"></i>Ocorrências</a>
+        <a href="#chamados" data-page="chamados"><i class="fa-solid fa-headset"></i>Chamados</a>
+        <a href="#acessos" data-page="acessos" id="access-nav" hidden><i class="fa-solid fa-user-plus"></i>Criar acesso</a>
+      </nav>
+      <div class="sidebar-note"><i class="fa-solid fa-shield-halved"></i><span>Ambiente interno<br>ACHA Imóveis</span></div>
+    </aside>
+
+    <main class="main-content">
+      <section class="page-panel active" id="dashboard">
+      <header class="page-header">
+        <div><p class="eyebrow">Visão gerencial</p><h1>Dashboard Operacional</h1><p class="subtitle">Resumo automático dos registros de ocorrências e lembretes operacionais.</p></div>
+        <button class="btn btn-primary" id="download-dashboard-btn"><i class="fa-solid fa-file-pdf"></i> Baixar Relatório</button>
+      </header>
+      <section class="dashboard-grid"><article class="card report-card"><div class="section-title"><div><h2>Principais origens de ocorrência</h2><p>Classificação mais recorrente nos registros realizados.</p></div></div><div id="error-report" class="report-list"></div></article><article class="card report-card"><div class="section-title"><div><h2>Relatório operacional</h2><p>Leitura rápida para acompanhamento da supervisão.</p></div></div><div id="dashboard-summary" class="summary-text"></div></article><article class="card report-card dashboard-full"><div class="section-title"><div><h2>Pendências a tratar</h2><p>Lembretes criados pela equipe operacional.</p></div></div><div id="dashboard-pending" class="pending-mini-list"></div></article></section>
+      </section>
+
+      <section class="page-panel" id="pendencias">
+      <header class="page-header"><div><p class="eyebrow">Organização operacional</p><h1>Pendências</h1><p class="subtitle">Crie lembretes de tarefas e defina a prioridade de cada uma.</p></div><button class="btn btn-primary" id="new-pending-btn"><i class="fa-solid fa-plus"></i> Nova Pendência</button></header>
+      <section class="pending-cards" id="pending-cards"></section><div class="empty-state card" id="pending-empty"><i class="fa-regular fa-clipboard"></i><strong>Nenhuma pendência criada</strong><span>Use “Nova Pendência” para registrar o que precisa ser feito.</span></div>
+      </section>
+
+      <section class="page-panel" id="chamados">
+      <header class="page-header"><div><p class="eyebrow">Acompanhamento da supervisão</p><h1>Chamados de Processo</h1><p class="subtitle">Abra um chamado para a supervisão acompanhar um processo parado.</p></div><button class="btn btn-primary" id="new-ticket-btn"><i class="fa-solid fa-plus"></i> Abrir Chamado</button></header>
+      <section class="card table-card"><div class="table-wrap"><table><thead><tr><th>Nº do chamado</th><th>Solicitante</th><th>Nome da pessoa</th><th>Número do bem</th><th>Onde está parado</th><th>Status</th></tr></thead><tbody id="ticket-table"></tbody></table></div><div class="empty-state" id="ticket-empty"><i class="fa-regular fa-comments"></i><strong>Nenhum chamado aberto</strong><span>Abra um chamado para a supervisão acompanhar o processo.</span></div></section>
+      </section>
+
+      <section class="page-panel" id="ocorrencias">
+      <header class="page-header">
+        <div><p class="eyebrow">Monitoramento operacional</p><h1>Registro de Ocorrências Operacionais</h1><p class="subtitle">Acompanhe, registre e trate situações identificadas nos processos.</p></div>
+        <button class="btn btn-primary" id="new-occurrence-btn"><i class="fa-solid fa-plus"></i> Nova Ocorrência</button>
+      </header>
+
+      <section class="stats-grid" aria-label="Resumo de ocorrências">
+        <article class="stat-card"><div class="stat-icon blue"><i class="fa-solid fa-folder-open"></i></div><div><span>Ocorrências Abertas</span><strong id="open-count">0</strong></div></article>
+        <article class="stat-card"><div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div><div><span>Ocorrências Resolvidas</span><strong id="resolved-count">0</strong></div></article>
+        <article class="stat-card"><div class="stat-icon purple"><i class="fa-solid fa-arrow-up-right-dots"></i></div><div><span>Ocorrências Escaladas</span><strong id="escalated-count">0</strong></div></article>
+        <article class="stat-card"><div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div><div><span>Ocorrências Críticas</span><strong id="critical-count">0</strong></div></article>
+      </section>
+
+      <section class="card filters-card">
+        <div class="section-title"><div><h2>Ocorrências registradas</h2><p>Use os filtros para localizar um registro específico.</p></div></div>
+        <form class="filters" id="filters-form">
+          <label><span>Pesquisar por cliente</span><input id="filter-client" type="search" placeholder="Nome do cliente"></label>
+          <label><span>Pesquisar por processo</span><input id="filter-process" type="search" placeholder="Número ou processo"></label>
+          <label><span>Pesquisar por responsável</span><input id="filter-owner" type="search" placeholder="Nome do responsável"></label>
+          <label><span>Localizar por ID</span><input id="filter-id" type="search" placeholder="ACHA-DDMMAAAA-001"></label>
+          <label><span>Pesquisar por número do bem</span><input id="filter-asset" type="search" placeholder="Número do bem"></label>
+          <label><span>Categoria</span><select id="filter-category"><option value="">Todas</option></select></label>
+          <label><span>Status</span><select id="filter-status"><option value="">Todos</option><option>Em andamento</option><option>Resolvido</option><option>Escalado</option></select></label>
+          <label><span>Período</span><input id="filter-period" type="date"></label>
+          <div class="filter-actions"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button><button class="btn btn-light" id="clear-filters" type="button">Limpar</button></div>
+        </form>
+      </section>
+
+      <section class="card table-card">
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>Data</th><th>Hora</th><th>Processo</th><th>Categoria</th><th>Impacto</th><th>Responsável</th><th>Envolvido</th><th>Tempo</th><th>Status</th><th class="actions-col">Ações</th></tr></thead><tbody id="occurrences-table"></tbody></table></div>
+        <div class="empty-state" id="empty-state" hidden><i class="fa-regular fa-folder-open"></i><strong>Nenhuma ocorrência encontrada</strong><span>Ajuste os filtros ou registre uma nova ocorrência.</span></div>
+      </section>
+      </section>
+      <section class="page-panel" id="acessos">
+        <header class="page-header"><div><p class="eyebrow">Administração local</p><h1>Criar acesso</h1><p class="subtitle">Gere uma senha temporária para testar o acesso de outra pessoa neste navegador.</p></div></header>
+        <section class="card access-card"><div class="section-title"><div><h2>Novo acesso</h2><p>Informe o e-mail. A pessoa criará a própria senha no primeiro acesso.</p></div></div><form id="access-form" class="access-form"><label>E-mail da pessoa<input id="access-email" type="email" required placeholder="nome@empresa.com"></label><button class="btn btn-primary" type="submit"><i class="fa-solid fa-user-plus"></i> Criar acesso</button></form><div class="generated-password" id="generated-password" hidden></div></section>
+        <section class="card table-card access-list-card"><div class="section-title"><div><h2>Acessos criados neste navegador</h2><p>Os convidados definem a senha quando entram pela primeira vez.</p></div></div><div class="table-wrap"><table><thead><tr><th>E-mail</th><th>Perfil</th><th>Status</th></tr></thead><tbody id="access-table"></tbody></table></div></section>
+      </section>
+    </main>
+  </div>
+
+  <div class="auth-gate" id="auth-gate" aria-live="polite"><section class="auth-card"><div class="auth-brand"><span class="avatar" aria-hidden="true">MO</span><div><strong>Monitoramento Operacional</strong><small>Ambiente de teste local</small></div></div><div id="login-view"><p class="eyebrow">Acesso ao sistema</p><h1>Entrar</h1><p>Informe seu e-mail e sua senha.</p><form id="login-form" class="auth-form"><label>E-mail<input id="login-identifier" type="email" required autocomplete="username" placeholder=""></label><label>Senha<input id="login-password" type="password" required autocomplete="current-password"></label><p class="auth-feedback" id="auth-feedback" hidden></p><button class="btn btn-primary" type="submit">Entrar</button></form></div><div id="password-setup-view" hidden><p class="eyebrow">Primeiro acesso</p><h1>Crie sua senha</h1><p id="password-setup-email"></p><form id="password-setup-form" class="auth-form"><input id="password-setup-identifier" type="hidden"><label>Nova senha<input id="password-setup-password" type="password" required minlength="6" autocomplete="new-password"></label><label>Confirmar nova senha<input id="password-setup-confirm" type="password" required minlength="6" autocomplete="new-password"></label><button class="btn btn-primary" id="save-password-and-enter" type="submit">Salvar e entrar</button><button class="btn btn-light" id="back-to-login" type="button">Voltar</button></form></div></section></div>
+
+  <div class="modal-backdrop" id="form-modal" aria-hidden="true"><section class="modal modal-large" role="dialog" aria-modal="true" aria-labelledby="form-modal-title"><header class="modal-header"><div><p class="eyebrow">Registro operacional</p><h2 id="form-modal-title">Nova Ocorrência</h2></div><button class="icon-btn close-modal" type="button" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></header>
+    <form id="occurrence-form" class="modal-body">
+      <input type="hidden" id="occurrence-id"><div class="form-section"><h3>Informações Gerais</h3><div class="form-grid three"><label>Data da identificação<input id="date" type="date" required></label><label>Hora da identificação<input id="time" type="time" required></label><label>Setor<select id="sector" required><option value="">Selecione</option><option>Intermediação</option><option>Despesas</option></select></label><label>Responsável<input id="responsible" type="text" required placeholder="Quem abriu a ocorrência"></label><label>Envolvido<select id="monitor" required><option value="">Selecione o setor primeiro</option></select></label><label id="supervisor-field">Supervisor<select id="supervisor"><option value="">Selecione o setor primeiro</option></select></label><label id="process-field">Processo(s) envolvido(s)<input id="process" type="text" placeholder="Ex.: PROC-2026-001" required></label><label id="client-field">Cliente<input id="client" type="text" placeholder="Nome do cliente" required></label><label id="asset-field">Número do bem<input id="asset-number" type="text" placeholder="Ex.: 005874"></label><p class="not-applicable" id="personal-notice" hidden><i class="fa-solid fa-circle-info"></i> Para motivo pessoal, processo, cliente e número do bem ficam como “Não se aplica”.</p></div></div>
+      <div class="form-section"><h3>Classificação</h3><div class="form-grid two"><label>Categoria<select id="category" required></select></label><label>Impacto<select id="impact" required><option value="">Selecione</option><option>Baixo</option><option>Médio</option><option>Alto</option><option>Crítico</option></select></label></div></div>
+      <div class="form-section"><h3>Registro da Ocorrência</h3><div class="form-grid"><label>Descrição objetiva da situação<textarea id="description" rows="4" required placeholder="Descreva de forma clara e objetiva a situação identificada."></textarea></label><label>Causa identificada<textarea id="cause" rows="3" placeholder="Informe a causa identificada, se houver."></textarea></label><label>Impacto observado ou potencial<textarea id="observed-impact" rows="3" placeholder="Descreva os impactos observados ou potenciais."></textarea></label></div></div>
+      <div class="form-section"><h3>Tratativa</h3><div class="form-grid"><label>Ação tomada<textarea id="action-taken" rows="3" placeholder="Registre as ações já realizadas."></textarea></label><div class="form-grid two"><label>Responsável pelo encaminhamento<input id="forwarding-owner" type="text" placeholder="Nome do responsável"></label><label>Status<select id="status" required><option>Em andamento</option><option>Resolvido</option><option>Escalado</option></select></label></div><label id="resolution-field" hidden>Descrição da resolução<textarea id="resolution" rows="3" placeholder="Descreva como a ocorrência foi resolvida."></textarea></label></div></div>
+      <footer class="modal-footer"><button class="btn btn-light close-modal" type="button">Cancelar</button><button class="btn btn-light" id="download-pdf-btn" type="button" disabled title="Salve a ocorrência para liberar o PDF"><i class="fa-solid fa-file-pdf"></i> Baixar PDF</button><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar Ocorrência</button></footer>
+    </form>
+  </section></div>
+
+  <div class="modal-backdrop" id="view-modal" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="view-modal-title"><header class="modal-header"><div><p class="eyebrow">Detalhes do registro</p><h2 id="view-modal-title">Ocorrência</h2></div><button class="icon-btn close-modal" type="button" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></header><div class="modal-body" id="view-content"></div><footer class="modal-footer"><button class="btn btn-light close-modal" type="button">Fechar</button></footer></section></div>
+  <div class="modal-backdrop" id="resolve-modal" aria-hidden="true"><section class="modal resolution-modal" role="dialog" aria-modal="true" aria-labelledby="resolve-modal-title"><header class="modal-header"><div><p class="eyebrow">Concluir ocorrência</p><h2 id="resolve-modal-title">Registrar resolução</h2></div><button class="icon-btn close-modal" type="button" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></header><form id="resolve-form" class="modal-body"><input type="hidden" id="resolve-occurrence-id"><div class="resolution-summary" id="resolve-occurrence-summary"></div><label>Descrição da resolução<textarea id="quick-resolution" rows="5" required placeholder="Descreva como a ocorrência foi resolvida."></textarea></label><p class="resolution-hint"><i class="fa-solid fa-circle-info"></i> Se esta descrição já estiver preenchida, basta clicar em concluir.</p><footer class="modal-footer"><button class="btn btn-light close-modal" type="button">Cancelar</button><button class="btn btn-primary" type="submit"><i class="fa-solid fa-circle-check"></i> Concluir ocorrência</button></footer></form></section></div>
+  <div class="modal-backdrop" id="pending-view-modal" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true"><header class="modal-header"><div><p class="eyebrow">Detalhes da pendência</p><h2>Pendência operacional</h2></div><button class="icon-btn close-modal" type="button" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button></header><div class="modal-body" id="pending-view-content"></div><footer class="modal-footer"><button class="btn btn-light close-modal" type="button">Fechar</button></footer></section></div>
+  <div class="modal-backdrop" id="pending-modal" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true"><header class="modal-header"><div><p class="eyebrow">Lembrete operacional</p><h2>Nova Pendência</h2></div><button class="icon-btn close-modal" type="button"><i class="fa-solid fa-xmark"></i></button></header><form id="pending-form" class="modal-body"><div class="form-grid"><label>Título<input id="pending-title" required placeholder="Ex.: Acompanhar despesas com a Lídia"></label><label>Descrição<textarea id="pending-text" rows="4" required placeholder="Descreva o que precisa ser feito."></textarea></label><label>Prioridade<select id="pending-priority" required><option value="Baixa">🟢 Baixa</option><option value="Média">🟡 Média</option><option value="Alta">🔴 Alta</option></select></label></div><footer class="modal-footer"><button class="btn btn-light close-modal" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Salvar Pendência</button></footer></form></section></div>
+  <div class="modal-backdrop" id="ticket-modal" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true"><header class="modal-header"><div><p class="eyebrow">Supervisão</p><h2>Abrir Chamado</h2></div><button class="icon-btn close-modal" type="button"><i class="fa-solid fa-xmark"></i></button></header><form id="ticket-form" class="modal-body"><div class="form-grid"><label>Nome da pessoa<input id="ticket-person" required placeholder="Cliente ou responsável"></label><label>Número do bem<input id="ticket-asset" required placeholder="Ex.: 005874"></label><label>Onde o processo está parado<textarea id="ticket-stopped" rows="3" required placeholder="Ex.: aguardando assinatura no cartório"></textarea></label><label>Descrição para a supervisão<textarea id="ticket-description" rows="3" placeholder="Contexto e ação esperada."></textarea></label></div><footer class="modal-footer"><button class="btn btn-light close-modal" type="button">Cancelar</button><button class="btn btn-primary" type="submit">Abrir Chamado</button></footer></form></section></div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="script.js"></script>
+  <script>
+    // Proteção do acesso administrador: mantém a entrada disponível mesmo se algum relatório antigo falhar ao carregar.
+    (() => {
+      const form = document.getElementById('login-form');
+      const email = document.getElementById('login-identifier');
+      const password = document.getElementById('login-password');
+      const gate = document.getElementById('auth-gate');
+      const app = document.getElementById('app-shell');
+      const feedback = document.getElementById('auth-feedback');
+      if (!form || !email || !password || !gate || !app) return;
+
+      const openDashboard = (loggedEmail, administrator) => {
+        try {
+          localStorage.setItem('acha-operational-session', JSON.stringify({
+            email: loggedEmail,
+            expiresAt: Date.now() + (5 * 60 * 1000)
+          }));
+        } catch (error) { /* O acesso atual continua disponível caso o navegador bloqueie o armazenamento. */ }
+        gate.hidden = true;
+        gate.style.display = 'none';
+        app.hidden = false;
+        document.getElementById('logged-user').textContent = loggedEmail;
+        document.getElementById('access-nav').hidden = !administrator;
+        document.querySelectorAll('.page-panel').forEach(panel => panel.classList.toggle('active', panel.id === 'dashboard'));
+        document.querySelectorAll('[data-page]').forEach(item => item.classList.toggle('active', item.dataset.page === 'dashboard'));
+        if (feedback) feedback.hidden = true;
+        window.location.hash = 'dashboard';
+      };
+
+      const savedUserWithPassword = (typedEmail, typedPassword) => {
+        try {
+          const users = JSON.parse(localStorage.getItem('acha-operational-users') || '[]');
+          return Array.isArray(users) && users.some(user =>
+            String(user.email || '').trim().toLowerCase() === typedEmail && String(user.password || '') === typedPassword
+          );
+        } catch (error) {
+          return false;
+        }
+      };
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const typedEmail = email.value.trim().toLowerCase();
+        const typedPassword = password.value.trim().replace(/,+$/, '');
+        if (typedEmail === 'pedromceara@hotmail.com' && typedPassword === 'Gl@diador45') {
+          openDashboard(typedEmail, true);
+          return;
+        }
+        if (savedUserWithPassword(typedEmail, password.value)) openDashboard(typedEmail, false);
+      });
+
+      const setupForm = document.getElementById('password-setup-form');
+      const setupIdentifier = document.getElementById('password-setup-identifier');
+      const setupPassword = document.getElementById('password-setup-password');
+      const setupConfirmation = document.getElementById('password-setup-confirm');
+      const savePasswordButton = document.getElementById('save-password-and-enter');
+      if (setupForm && setupIdentifier && setupPassword && setupConfirmation) {
+        const savePasswordAndEnter = event => {
+          event.preventDefault();
+          const invitedEmail = setupIdentifier.value.trim().toLowerCase();
+          const newPassword = setupPassword.value;
+          if (!invitedEmail || !newPassword || newPassword !== setupConfirmation.value) return;
+          try {
+            const users = JSON.parse(localStorage.getItem('acha-operational-users') || '[]');
+            const userIndex = Array.isArray(users) ? users.findIndex(user => String(user.email || '').toLowerCase() === invitedEmail) : -1;
+            if (userIndex >= 0) {
+              users[userIndex] = { ...users[userIndex], password: newPassword, status: 'Ativo' };
+              localStorage.setItem('acha-operational-users', JSON.stringify(users));
+            }
+          } catch (error) { /* O acesso segue normalmente quando o navegador não permite armazenamento local. */ }
+          openDashboard(invitedEmail, invitedEmail === 'pedromceara@hotmail.com');
+        };
+        setupForm.addEventListener('submit', savePasswordAndEnter);
+        if (savePasswordButton) savePasswordButton.addEventListener('click', savePasswordAndEnter);
+      }
+    })();
+  </script>
+</body>
+</html>
