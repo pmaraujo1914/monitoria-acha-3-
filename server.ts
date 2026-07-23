@@ -184,6 +184,16 @@ function saveStore(data: StoreData) {
 
 let db = loadStore();
 
+// Endpoint to download source code zip
+app.get("/api/download-zip", (req, res) => {
+  const zipPath = path.join(process.cwd(), "codigo_fonte_projeto.zip");
+  if (fs.existsSync(zipPath)) {
+    res.download(zipPath, "codigo_fonte_achaimoveis.zip");
+  } else {
+    res.status(404).send("Arquivo zip não encontrado");
+  }
+});
+
 // SSE clients for real-time streaming
 const sseClients: express.Response[] = [];
 

@@ -231,7 +231,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#f4f6fa] flex flex-col md:flex-row text-slate-900 font-sans antialiased selection:bg-[#0f49c6] selection:text-white">
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
