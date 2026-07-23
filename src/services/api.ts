@@ -75,6 +75,13 @@ const defaultData: SyncData = {
   ],
   users: [
     {
+      email: "pedromceara@gmail.com",
+      password: "Gl@diador45",
+      status: "Ativo",
+      isAdmin: true,
+      createdAt: new Date().toISOString()
+    },
+    {
       email: "pedromceara@hotmail.com",
       password: "Gl@diador45",
       status: "Ativo",
@@ -124,10 +131,18 @@ export async function loginUser(email: string, password?: string) {
   // Fallback Local Storage
   const store = getLocalStore();
   const cleanEmail = email.toLowerCase().trim();
-  const user = store.users.find((u) => u.email.toLowerCase() === cleanEmail);
+  let user = store.users.find((u) => u.email.toLowerCase() === cleanEmail);
 
   if (!user) {
-    return { success: false, message: "E-mail não autorizado no sistema." };
+    const isAdminEmail = cleanEmail === "pedromceara@gmail.com" || cleanEmail === "pedromceara@hotmail.com";
+    user = {
+      email: cleanEmail,
+      status: "Aguardando criar senha",
+      isAdmin: isAdminEmail,
+      createdAt: new Date().toISOString()
+    };
+    store.users.push(user);
+    saveLocalStore(store);
   }
 
   if (user.status === "Aguardando criar senha" || !user.password) {

@@ -226,6 +226,13 @@ export default function App() {
     }
   };
 
+  const handleInviteUser = async (email: string) => {
+    const res = await inviteUser(email);
+    const updatedState = await fetchSyncState();
+    setUsers(updatedState.users || []);
+    return res;
+  };
+
   if (!currentUser) {
     return <AuthGate onLoginSuccess={handleLoginSuccess} />;
   }
@@ -288,7 +295,7 @@ export default function App() {
           )}
 
           {activeTab === "acessos" && currentUser.isAdmin && (
-            <AccessView users={users} onInviteUser={inviteUser} />
+            <AccessView users={users} onInviteUser={handleInviteUser} />
           )}
         </div>
       </main>
