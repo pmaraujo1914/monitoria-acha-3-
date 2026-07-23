@@ -14,7 +14,7 @@ import {
   Pending,
   Ticket,
   UserAccount
-} from "./db/service.js";
+} from "./db/service";
 
 const app = express();
 
