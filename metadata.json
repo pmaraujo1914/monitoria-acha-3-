@@ -1,0 +1,6 @@
+{
+  "name": "Monitoramento Operacional - ACHA Imóveis",
+  "description": "Sistema completo de registro, acompanhamento e sincronização em tempo real de ocorrências, pendências e chamados operacionais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
