@@ -1,5 +1,5 @@
-import { getDb } from './index';
-import * as schema from './schema';
+import { getDb } from './index.js';
+import * as schema from './schema.js';
 import { eq, sql } from 'drizzle-orm';
 import fs from 'fs';
 import path from 'path';

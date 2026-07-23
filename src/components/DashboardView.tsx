@@ -15,7 +15,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ occurrences, pendi
   }, {} as Record<string, number>);
 
   const rankedCategories = Object.entries(categoryCounts)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => (b[1] as number) - (a[1] as number))
     .slice(0, 5);
 
   const totalOccurrences = occurrences.length;
